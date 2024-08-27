@@ -50,10 +50,40 @@ class Cell {
 
 }
 
+const checkValid = (vals: (number | undefined)[]) => {
+    return JSON.stringify(vals) == JSON.stringify([1,2,3,4,5,6,7,8,9])
+    
+}
+
 class Grid {
     cells: Cell[] = []
     isSelecting: boolean = false
     isUnselecting: boolean = false
+
+    checkSolution(){
+        for(let row = 0; row < 9; row++){
+            let vals = this.cells.slice(row * 9,row * 9 + 9).map(c => c.value)
+            vals.sort()
+            if(!checkValid(vals)){
+                return "not donezo"
+            }
+        }
+        for(let col = 0; col < 9; col++){
+            let vals: number[] = []
+            for(let i = 0; i < 9; i++){
+                vals.push(this.cells[i * 9 + col].value || 0)
+            }
+            vals.sort()
+            if(!checkValid(vals)){
+                return "not donezo"
+            }
+        }
+        return "donezo"
+    }
+
+    filledCellCount(){
+        return this.cells.filter(c => c.value).length
+    }
 }
 
 const grid = new Grid()
@@ -184,15 +214,30 @@ document.addEventListener('mousemove', (ev) => {
 // })
 
 document.addEventListener('keydown', (ev) => {
+    if(ev.metaKey && ev.key == 'a'){
+        grid.cells.forEach(c => {
+            c.selected = true
+        })
+    }
     if(ev.keyCode >= 48 && ev.keyCode <= 57){
         console.log(ev)
         grid.cells.forEach(cell => {
             if(cell.selected && !cell.locked){
                 if(ev.altKey){
-                    cell.centerPencil = Number(ev.keyCode - 48)
+                    if(cell.centerPencil == Number(ev.keyCode - 48)){
+                        cell.centerPencil = undefined
+                    }
+                    else {
+                        cell.centerPencil = Number(ev.keyCode - 48)
+                    }
                 }
                 else if(ev.ctrlKey){
-                    cell.cornerPencil = Number(ev.keyCode - 48)
+                    if(cell.cornerPencil == Number(ev.keyCode - 48)){
+                        cell.cornerPencil = undefined
+                    }
+                    else{
+                        cell.cornerPencil = Number(ev.keyCode - 48)
+                    }
                 }
                 else if(cell.value == Number(ev.key)){
                     cell.value = undefined
@@ -205,6 +250,10 @@ document.addEventListener('keydown', (ev) => {
         })
     }
     renderGrid()
+
+    if(grid.filledCellCount() == 81){
+        console.log(grid.checkSolution())
+    }
 })
 
 renderGrid()

@@ -37,12 +37,38 @@ var Cell = /** @class */ (function () {
     }
     return Cell;
 }());
+var checkValid = function (vals) {
+    return JSON.stringify(vals) == JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+};
 var Grid = /** @class */ (function () {
     function Grid() {
         this.cells = [];
         this.isSelecting = false;
         this.isUnselecting = false;
     }
+    Grid.prototype.checkSolution = function () {
+        for (var row = 0; row < 9; row++) {
+            var vals = this.cells.slice(row * 9, row * 9 + 9).map(function (c) { return c.value; });
+            vals.sort();
+            if (!checkValid(vals)) {
+                return "not donezo";
+            }
+        }
+        for (var col = 0; col < 9; col++) {
+            var vals = [];
+            for (var i = 0; i < 9; i++) {
+                vals.push(this.cells[i * 9 + col].value || 0);
+            }
+            vals.sort();
+            if (!checkValid(vals)) {
+                return "not donezo";
+            }
+        }
+        return "donezo";
+    };
+    Grid.prototype.filledCellCount = function () {
+        return this.cells.filter(function (c) { return c.value; }).length;
+    };
     return Grid;
 }());
 var grid = new Grid();
@@ -150,15 +176,30 @@ document.addEventListener('mousemove', function (ev) {
 //     renderGrid()
 // })
 document.addEventListener('keydown', function (ev) {
+    if (ev.metaKey && ev.key == 'a') {
+        grid.cells.forEach(function (c) {
+            c.selected = true;
+        });
+    }
     if (ev.keyCode >= 48 && ev.keyCode <= 57) {
         console.log(ev);
         grid.cells.forEach(function (cell) {
             if (cell.selected && !cell.locked) {
                 if (ev.altKey) {
-                    cell.centerPencil = Number(ev.keyCode - 48);
+                    if (cell.centerPencil == Number(ev.keyCode - 48)) {
+                        cell.centerPencil = undefined;
+                    }
+                    else {
+                        cell.centerPencil = Number(ev.keyCode - 48);
+                    }
                 }
                 else if (ev.ctrlKey) {
-                    cell.cornerPencil = Number(ev.keyCode - 48);
+                    if (cell.cornerPencil == Number(ev.keyCode - 48)) {
+                        cell.cornerPencil = undefined;
+                    }
+                    else {
+                        cell.cornerPencil = Number(ev.keyCode - 48);
+                    }
                 }
                 else if (cell.value == Number(ev.key)) {
                     cell.value = undefined;
@@ -170,5 +211,8 @@ document.addEventListener('keydown', function (ev) {
         });
     }
     renderGrid();
+    if (grid.filledCellCount() == 81) {
+        console.log(grid.checkSolution());
+    }
 });
 renderGrid();
