@@ -15,6 +15,16 @@ function mapf(val:number, inMin:number, inMax:number, outMin:number, outMax:numb
     return outMin + ((val - inMin) / (inMax - inMin) * (outMax))
 }
 
+const clamp = (val: number, min: number, max: number) => {
+    if(val < min){
+        return min
+    }
+    if (val > max){
+        return max
+    }
+    return val
+}
+
 class Cell {
     value: number | undefined
     fillColor: string | undefined
@@ -103,8 +113,8 @@ document.addEventListener('mousedown', (ev) => {
     const canvasRect = canvas.getBoundingClientRect()
     const mouseX = ev.clientX - canvasRect.left
     const mouseY = ev.clientY - canvasRect.top
-    const row = Math.floor(mapf(mouseY, 0, SIZE, 0, 9))
-    const col = Math.floor(mapf(mouseX, 0, SIZE, 0, 9))
+    const row = clamp(Math.floor(mapf(mouseY, 0, SIZE, 0, 9)),0,8)
+    const col = clamp(Math.floor(mapf(mouseX, 0, SIZE, 0, 9)),0,8)
     console.log({mouseX,mouseY,row,col})
     const cell = grid.cells[row * 9 + col]
     grid.isSelecting = !cell.selected
@@ -125,8 +135,8 @@ document.addEventListener('mousemove', (ev) => {
         const canvasRect = canvas.getBoundingClientRect()
         const mouseX = ev.clientX - canvasRect.left
         const mouseY = ev.clientY - canvasRect.top
-        const row = Math.floor(mapf(mouseY, 0, SIZE, 0, 9))
-        const col = Math.floor(mapf(mouseX, 0, SIZE, 0, 9))
+        const row = clamp(Math.floor(mapf(mouseY, 0, SIZE, 0, 9)),0,8)
+        const col = clamp(Math.floor(mapf(mouseX, 0, SIZE, 0, 9)),0,8)
         console.log({mouseX,mouseY,row,col})
         const cell = grid.cells[row * 9 + col]
         cell.selected = grid.isSelecting ? true : grid.isUnselecting ? false : cell.selected

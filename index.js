@@ -8,6 +8,15 @@ var ctx = canvas.getContext('2d');
 function mapf(val, inMin, inMax, outMin, outMax) {
     return outMin + ((val - inMin) / (inMax - inMin) * (outMax));
 }
+var clamp = function (val, min, max) {
+    if (val < min) {
+        return min;
+    }
+    if (val > max) {
+        return max;
+    }
+    return val;
+};
 var Cell = /** @class */ (function () {
     function Cell() {
         this.selected = false;
@@ -77,8 +86,8 @@ document.addEventListener('mousedown', function (ev) {
     var canvasRect = canvas.getBoundingClientRect();
     var mouseX = ev.clientX - canvasRect.left;
     var mouseY = ev.clientY - canvasRect.top;
-    var row = Math.floor(mapf(mouseY, 0, SIZE, 0, 9));
-    var col = Math.floor(mapf(mouseX, 0, SIZE, 0, 9));
+    var row = clamp(Math.floor(mapf(mouseY, 0, SIZE, 0, 9)), 0, 8);
+    var col = clamp(Math.floor(mapf(mouseX, 0, SIZE, 0, 9)), 0, 8);
     console.log({ mouseX: mouseX, mouseY: mouseY, row: row, col: col });
     var cell = grid.cells[row * 9 + col];
     grid.isSelecting = !cell.selected;
@@ -97,8 +106,8 @@ document.addEventListener('mousemove', function (ev) {
         var canvasRect = canvas.getBoundingClientRect();
         var mouseX = ev.clientX - canvasRect.left;
         var mouseY = ev.clientY - canvasRect.top;
-        var row = Math.floor(mapf(mouseY, 0, SIZE, 0, 9));
-        var col = Math.floor(mapf(mouseX, 0, SIZE, 0, 9));
+        var row = clamp(Math.floor(mapf(mouseY, 0, SIZE, 0, 9)), 0, 8);
+        var col = clamp(Math.floor(mapf(mouseX, 0, SIZE, 0, 9)), 0, 8);
         console.log({ mouseX: mouseX, mouseY: mouseY, row: row, col: col });
         var cell = grid.cells[row * 9 + col];
         cell.selected = grid.isSelecting ? true : grid.isUnselecting ? false : cell.selected;
