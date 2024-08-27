@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build":"tsc index.ts",
+    "deploy":"tsc index.ts && git add --all && git commit -am 'deploy' && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
