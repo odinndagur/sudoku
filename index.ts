@@ -9,6 +9,19 @@ canvas.width = SIZE
 canvas.height = SIZE
 const ctx = canvas.getContext('2d')
 
+const sudokuNumbers = [
+    0,0,0,2,6,0,7,0,1,
+    6,8,0,0,7,0,0,9,0,
+    1,9,0,0,0,4,5,0,0,
+    8,2,0,1,0,0,0,4,0,
+    0,0,4,6,0,2,9,0,0,
+    0,5,0,0,0,3,0,2,8,
+    0,0,9,3,0,0,0,7,4,
+    0,4,0,0,5,0,0,3,6,
+    7,0,3,0,1,8,0,0,0
+
+]
+
 
 
 function mapf(val:number, inMin:number, inMax:number, outMin:number, outMax:number){
@@ -31,6 +44,7 @@ class Cell {
     cornerPencil: number | number[] | undefined
     centerPencil: number | number[] | undefined
     selected: boolean = false
+    locked: boolean = false
     // row: number
     // column: number
 
@@ -48,6 +62,10 @@ for(let idx = 0; idx < 9 * 9; idx ++){
     let c = new Cell()
     if(Math.random() > 0.5){
         c.value = Math.floor((Math.random()*9)+1)
+    }
+    c.value = sudokuNumbers[idx]
+    if(c.value){
+        c.locked = true
     }
     grid.cells.push(c)
 }
@@ -119,7 +137,16 @@ document.addEventListener('mousedown', (ev) => {
     const cell = grid.cells[row * 9 + col]
     grid.isSelecting = !cell.selected
     grid.isUnselecting = cell.selected
-    cell.selected = !cell.selected
+    // cell.selected = !cell.selected
+    if(!cell.selected && !ev.shiftKey){
+        grid.cells.forEach(c => {
+            c.selected = false
+        })
+        cell.selected = true
+    }
+    else {
+        cell.selected = !cell.selected
+    }
     // grid.cells[row * 9 + col].selected = !grid.cells[row * 9 + col].selected
     // grid.isSelecting = true
     renderGrid()
@@ -160,7 +187,7 @@ document.addEventListener('keydown', (ev) => {
     if(ev.keyCode >= 48 && ev.keyCode <= 57){
         console.log(ev)
         grid.cells.forEach(cell => {
-            if(cell.selected){
+            if(cell.selected && !cell.locked){
                 if(ev.altKey){
                     cell.centerPencil = Number(ev.keyCode - 48)
                 }

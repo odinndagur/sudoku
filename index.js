@@ -5,6 +5,17 @@ var SIZE = 600;
 canvas.width = SIZE;
 canvas.height = SIZE;
 var ctx = canvas.getContext('2d');
+var sudokuNumbers = [
+    0, 0, 0, 2, 6, 0, 7, 0, 1,
+    6, 8, 0, 0, 7, 0, 0, 9, 0,
+    1, 9, 0, 0, 0, 4, 5, 0, 0,
+    8, 2, 0, 1, 0, 0, 0, 4, 0,
+    0, 0, 4, 6, 0, 2, 9, 0, 0,
+    0, 5, 0, 0, 0, 3, 0, 2, 8,
+    0, 0, 9, 3, 0, 0, 0, 7, 4,
+    0, 4, 0, 0, 5, 0, 0, 3, 6,
+    7, 0, 3, 0, 1, 8, 0, 0, 0
+];
 function mapf(val, inMin, inMax, outMin, outMax) {
     return outMin + ((val - inMin) / (inMax - inMin) * (outMax));
 }
@@ -20,6 +31,7 @@ var clamp = function (val, min, max) {
 var Cell = /** @class */ (function () {
     function Cell() {
         this.selected = false;
+        this.locked = false;
         // row: number
         // column: number
     }
@@ -38,6 +50,10 @@ for (var idx = 0; idx < 9 * 9; idx++) {
     var c = new Cell();
     if (Math.random() > 0.5) {
         c.value = Math.floor((Math.random() * 9) + 1);
+    }
+    c.value = sudokuNumbers[idx];
+    if (c.value) {
+        c.locked = true;
     }
     grid.cells.push(c);
 }
@@ -92,7 +108,16 @@ document.addEventListener('mousedown', function (ev) {
     var cell = grid.cells[row * 9 + col];
     grid.isSelecting = !cell.selected;
     grid.isUnselecting = cell.selected;
-    cell.selected = !cell.selected;
+    // cell.selected = !cell.selected
+    if (!cell.selected && !ev.shiftKey) {
+        grid.cells.forEach(function (c) {
+            c.selected = false;
+        });
+        cell.selected = true;
+    }
+    else {
+        cell.selected = !cell.selected;
+    }
     // grid.cells[row * 9 + col].selected = !grid.cells[row * 9 + col].selected
     // grid.isSelecting = true
     renderGrid();
@@ -128,7 +153,7 @@ document.addEventListener('keydown', function (ev) {
     if (ev.keyCode >= 48 && ev.keyCode <= 57) {
         console.log(ev);
         grid.cells.forEach(function (cell) {
-            if (cell.selected) {
+            if (cell.selected && !cell.locked) {
                 if (ev.altKey) {
                     cell.centerPencil = Number(ev.keyCode - 48);
                 }
